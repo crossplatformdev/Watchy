@@ -25,6 +25,8 @@
 watchySettings settings{
     #ifdef CITY_ID
         .cityID = CITY_ID,
+        .lat = "",
+        .lon = "",
     #else
         .cityID = "",
         .lat = LAT,
