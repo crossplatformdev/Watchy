@@ -5,8 +5,8 @@
 #define CITY_ID "5336545" //Diamond Bar https://openweathermap.org/current#cityid
 
 //You can also use LAT,LON for your location instead of CITY_ID, but not both
-//#define LAT "40.7127" //New York City, Looked up on https://www.latlong.net/
-//#define LON "-74.0059"
+#define LAT "33.998138" //Diamond Bar, Looked up on https://www.latlong.net/
+#define LON "-117.835258"
 
 #ifdef CITY_ID
     #define OPENWEATHERMAP_URL "http://api.openweathermap.org/data/2.5/weather?id={cityID}&lang={lang}&units={units}&appid={apiKey}" //open weather api using city ID
