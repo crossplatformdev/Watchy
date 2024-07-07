@@ -106,25 +106,13 @@ void WatchyVanilla::drawBattery() {
     display.getTextBounds("X1Il^qpyi", 0, 0, &x1, &y1, &w, &h);
     lineY += h;
 
-    int8_t level = 0;
     float V = getBatteryVoltage();
-
-    if (V >= 3.3) {
-        level = 100.0 * (V - 3.3) / 0.9;
-    }
-
-    if (level > 100) {
-        level = 100;
-    }
 
     display.setFont(&FreeMono12pt7b);
     display.setCursor(0, lineY);
-    display.print("Battery:  ");
-    if (level < 100) {
-        display.print(" ");
-    }
-    display.print(level);
-    display.println("%");
+    display.print("Batt V: ");
+    display.print(V);
+    display.println("");
 
     lineY += 2;
 }
