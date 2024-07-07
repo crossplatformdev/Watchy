@@ -11,9 +11,11 @@ void WatchyVanilla::drawWatchFace() {
 }
 
 void WatchyVanilla::drawTime() {
-    int relTzHour[] = {0, 10, 12};
+    uint16_t i;
+
+    int relTzHour[] = {0, 3, 12};
     int relTzMin[] = {0, 0, 30};
-    String tzName[] = {" PST", "EEST", " IST"};
+    String tzName[] = {"PST", "EST", "IST"};
 
     String adjustedTime;
     int16_t x1, y1;
@@ -24,7 +26,7 @@ void WatchyVanilla::drawTime() {
     display.setFont(&DSEG7Classic_Regular12pt7b);
     display.getTextBounds("88:888", 0, 0, &x1, &y1, &w, &h);
 
-    for(int i = 0; i < 3; i++) {
+    for(i = 0; i < 3; i++) {
         adjustedTime = getAdjustedTime(relTzHour[i], relTzMin[i]);
         display.setFont(&DSEG7Classic_Regular12pt7b);
         lineY += h;
