@@ -146,61 +146,66 @@ void WatchyVanilla::drawConnectivity() {
 }
 
 void WatchyVanilla::drawWeather() {
-    int16_t x1, y1;
-    uint16_t w, h;
-    weatherData currentWeather = getWeatherData();
-    int8_t temperature = currentWeather.temperature;
-    int16_t weatherConditionCode = currentWeather.weatherConditionCode;
-
     display.setFont(&FreeMono12pt7b);
     lineY += other.h;
 
     display.setCursor(0, lineY);
-    display.print(temperature);
+    if (WIFI_CONFIGURED) {
+        int16_t x1, y1;
+        uint16_t w, h;
+        weatherData currentWeather = getWeatherData();
+        int8_t temperature = currentWeather.temperature;
+        int16_t weatherConditionCode = currentWeather.weatherConditionCode;
 
-    display.getTextBounds(String(temperature), 0, 0, &x1, &y1, &w, &h);
-    display.print(" F");
+        display.print(temperature);
 
-    display.print(' ');
+        display.getTextBounds(String(temperature), 0, 0, &x1, &y1, &w, &h);
+        display.print(" F");
 
-    String weatherIcon("");
-    // https://openweathermap.org/weather-conditions
-    if (weatherConditionCode > 801) {
-        // Cloudy
-        weatherIcon = "CLOUDY";
-    }
-    else if (weatherConditionCode == 801) {
-        // Few Clouds
-        weatherIcon = "L CLOUD";
-    }
-    else if (weatherConditionCode == 800) {
-        // Clear
-        weatherIcon = "CLEAR";
-    }
-    else if (weatherConditionCode >= 700) {
-        // Atmosphere
-        weatherIcon = "ATMO";
-    }
-    else if (weatherConditionCode >= 600) {
-        // Snow
-        weatherIcon = "SNOW";
-    }
-    else if (weatherConditionCode >= 500) {
-        // Rain
-        weatherIcon = "RAIN";
-    }
-    else if (weatherConditionCode >= 300) {
-        // Drizzle
-        weatherIcon = "L RAIN";
-    }
-    else if (weatherConditionCode >= 200) {
-        // Thunderstorm
-        weatherIcon = "STORM";
-    }
-    display.println(weatherIcon);
+        display.print(' ');
 
-    display.setCursor(w + DEFAULT_DEGREE_SYMBOL_SPACING, lineY - h / 2);
-    display.print('o');
+        String weatherIcon("");
+        // https://openweathermap.org/weather-conditions
+        if (weatherConditionCode > 801) {
+            // Cloudy
+            weatherIcon = "CLOUDY";
+        }
+        else if (weatherConditionCode == 801) {
+            // Few Clouds
+            weatherIcon = "L CLOUD";
+        }
+        else if (weatherConditionCode == 800) {
+            // Clear
+            weatherIcon = "CLEAR";
+        }
+        else if (weatherConditionCode >= 700) {
+            // Atmosphere
+            weatherIcon = "ATMO";
+        }
+        else if (weatherConditionCode >= 600) {
+            // Snow
+            weatherIcon = "SNOW";
+        }
+        else if (weatherConditionCode >= 500) {
+            // Rain
+            weatherIcon = "RAIN";
+        }
+        else if (weatherConditionCode >= 300) {
+            // Drizzle
+            weatherIcon = "L RAIN";
+        }
+        else if (weatherConditionCode >= 200) {
+            // Thunderstorm
+            weatherIcon = "STORM";
+        }
+        display.println(weatherIcon);
+
+        display.setCursor(w + DEFAULT_DEGREE_SYMBOL_SPACING, lineY - h / 2);
+        display.print('o');
+    }
+    else {
+        display.println("NOT  CONNECTED");
+    }
 }
 
 Position WatchyVanilla::getNextLinePositionTime() {
