@@ -68,12 +68,12 @@ void WatchyVanilla::drawTime() {
         lineY += time.h;
         display.setCursor(0, lineY);
         if (times[i].hour < 10) {
-            display.print("0");
+            display.print(0);
         }
         display.print(times[i].hour);
-        display.print(":");
+        display.print(':');
         if (times[i].minute < 10) {
-            display.print("0");
+            display.print(0);
         }
         display.print(times[i].minute);
         display.setFont(&FreeMono12pt7b);
@@ -88,16 +88,16 @@ void WatchyVanilla::drawDate() {
     lineY += other.h;
     display.setCursor(0, lineY);
     display.print(date.weekday);
-    display.print(" ");
+    display.print(' ');
     display.print(date.year);
-    display.print("-");
+    display.print('-');
     if (date.month < 10) {
-        display.print("0");
+        display.print(0);
     }
     display.print(date.month);
     display.print("-");
     if (date.day < 10) {
-        display.print("0");
+        display.print(0);
     }
     display.println(date.day);
     lineY += DEFAULT_LINE_SPACING;
@@ -122,10 +122,10 @@ void WatchyVanilla::drawBattery() {
     display.setCursor(0, lineY);
     display.print("Battery:  ");
     if (batteryPercentage < 100) {
-        display.print(" ");
+        display.print(' ');
     }
     display.print(batteryPercentage);
-    display.println("%");
+    display.println('%');
 
     lineY += DEFAULT_LINE_SPACING;
 }
@@ -137,10 +137,10 @@ void WatchyVanilla::drawConnectivity() {
     display.setFont(&FreeMono12pt7b);
     display.setCursor(0, lineY);
     display.print("Wifi: ");
-    display.print(WIFI_CONFIGURED ? "Y" : "N");
+    display.print(WIFI_CONFIGURED ? 'Y' : 'N');
 
     display.print(" BLE: ");
-    display.println(BLE_CONFIGURED ? "Y" : "N");
+    display.println(BLE_CONFIGURED ? 'Y' : 'N');
 
     lineY += DEFAULT_LINE_SPACING;
 }
@@ -161,7 +161,8 @@ void WatchyVanilla::drawWeather() {
     display.getTextBounds(String(temperature), 0, 0, &x1, &y1, &w, &h);
     display.print(" F");
 
-    display.print(" ");
+    display.print(' ');
+
     String weatherIcon("");
     // https://openweathermap.org/weather-conditions
     if (weatherConditionCode > 801) {
@@ -199,7 +200,7 @@ void WatchyVanilla::drawWeather() {
     display.println(weatherIcon);
 
     display.setCursor(w + DEFAULT_DEGREE_SYMBOL_SPACING, lineY - h / 2);
-    display.print("o");
+    display.print('o');
 }
 
 Position WatchyVanilla::getNextLinePositionTime() {
