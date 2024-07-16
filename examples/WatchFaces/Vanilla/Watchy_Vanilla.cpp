@@ -42,6 +42,9 @@ void WatchyVanilla::drawTime() {
 String WatchyVanilla::getAdjustedTime(int hourOffset, int minuteOffset) {
     int displayMinute = (currentTime.Minute + minuteOffset) % 60;
     int displayHour = (currentTime.Hour + hourOffset) % 24 + (currentTime.Minute + minuteOffset >= 60 ? 1 : 0);
+    if (displayHour == 24) {
+        displayHour = 0;
+    }
 
     String timeStr("");
     if (displayHour < 10) {
@@ -109,12 +112,16 @@ void WatchyVanilla::drawBattery() {
     lineY += h;
 
     float V = getBatteryVoltage();
+    int batP = (int)((V - 3.48) / (3.91 - 3.48) * 100);
 
     display.setFont(&FreeMono12pt7b);
     display.setCursor(0, lineY);
-    display.print("Batt V: ");
-    display.print(V);
-    display.println("");
+    display.print("Battery:  ");
+    if (batP < 100) {
+        display.print(" ");
+    }
+    display.print(batP);
+    display.println("%");
 
     lineY += 2;
 }
