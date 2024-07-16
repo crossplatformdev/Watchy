@@ -18,22 +18,17 @@ void WatchyVanilla::drawTime() {
     String tzName[] = {"PST", "EST", "IST"};
 
     String adjustedTime;
-    int16_t x1, y1;
-    uint16_t w, h;
 
     lineY += 2;
-
-    display.setFont(&DSEG7Classic_Regular12pt7b);
-    display.getTextBounds("88:888", 0, 0, &x1, &y1, &w, &h);
 
     for(i = 0; i < 3; i++) {
         adjustedTime = getAdjustedTime(relTzHour[i], relTzMin[i]);
         display.setFont(&DSEG7Classic_Regular12pt7b);
-        lineY += h;
+        lineY += time.h;
         display.setCursor(0, lineY);
         display.print(adjustedTime);
         display.setFont(&FreeMono12pt7b);
-        display.setCursor(w + 5, lineY);
+        display.setCursor(time.w + 5, lineY);
         display.print(tzName[i]);
         lineY += 2;
     }
@@ -63,11 +58,8 @@ String WatchyVanilla::getAdjustedTime(int hourOffset, int minuteOffset) {
 }
 
 void WatchyVanilla::drawDate() {
-    int16_t x1, y1;
-    uint16_t w, h;
     display.setFont(&FreeMono12pt7b);
-    display.getTextBounds("X1Il^qpyi", 0, 0, &x1, &y1, &w, &h);
-    lineY += h;
+    lineY += other.h;
     display.setCursor(0, lineY);
     display.print(dayShortStr(currentTime.Wday));
     display.print(" ");
@@ -90,11 +82,8 @@ void WatchyVanilla::drawSteps() {
         sensor.resetStepCounter();
     }
 
-    int16_t x1, y1;
-    uint16_t w, h;
     display.setFont(&FreeMono12pt7b);
-    display.getTextBounds("X1Il^qpyi", 0, 0, &x1, &y1, &w, &h);
-    lineY += h;
+    lineY += other.h;
 
     uint32_t stepCount = sensor.getCounter();
     display.setCursor(0, lineY);
@@ -105,11 +94,8 @@ void WatchyVanilla::drawSteps() {
 }
 
 void WatchyVanilla::drawBattery() {
-    int16_t x1, y1;
-    uint16_t w, h;
     display.setFont(&FreeMono12pt7b);
-    display.getTextBounds("X1Il^qpyi", 0, 0, &x1, &y1, &w, &h);
-    lineY += h;
+    lineY += other.h;
 
     float V = getBatteryVoltage();
     int batP = (int)((V - 3.48) / (3.91 - 3.48) * 100);
@@ -127,11 +113,8 @@ void WatchyVanilla::drawBattery() {
 }
 
 void WatchyVanilla::drawConnectivity() {
-    int16_t x1, y1;
-    uint16_t w, h;
     display.setFont(&FreeMono12pt7b);
-    display.getTextBounds("X1Il^qpyi", 0, 0, &x1, &y1, &w, &h);
-    lineY += h;
+    lineY += other.h;
 
     display.setFont(&FreeMono12pt7b);
     display.setCursor(0, lineY);
@@ -145,15 +128,14 @@ void WatchyVanilla::drawConnectivity() {
 }
 
 void WatchyVanilla::drawWeather() {
+    int16_t x1, y1;
+    uint16_t w, h;
     weatherData currentWeather = getWeatherData();
     int8_t temperature = currentWeather.temperature;
     int16_t weatherConditionCode = currentWeather.weatherConditionCode;
-    int16_t x1, y1;
-    uint16_t w, h;
 
     display.setFont(&FreeMono12pt7b);
-    display.getTextBounds("X1Il^qpyi", 0, 0, &x1, &y1, &w, &h);
-    lineY += h;
+    lineY += other.h;
 
     display.setCursor(0, lineY);
     display.print(temperature);
@@ -202,8 +184,34 @@ void WatchyVanilla::drawWeather() {
     display.print("o");
 }
 
+Position WatchyVanilla::getNextLinePositionTime() {
+    return getNextLinePositionHelper(&DSEG7Classic_Regular12pt7b, "88:888");
+}
+
+Position WatchyVanilla::getNextLinePositionOther() {
+    return getNextLinePositionHelper(&FreeMono12pt7b, "X1Il^qpyi");
+}
+
+Position WatchyVanilla::getNextLinePositionHelper(const GFXfont *font, String callibration) {
+    int16_t x1, y1;
+    uint16_t w, h;
+
+    display.setFont(font);
+    display.getTextBounds(callibration, 0, 0, &x1, &y1, &w, &h);
+
+    Position pos;
+    pos.x1 = x1;
+    pos.y1 = y1;
+    pos.w = w;
+    pos.h = h;
+
+    return pos;
+}
+
 void WatchyVanilla::initialize() {
     display.fillScreen(GxEPD_WHITE);
     display.setTextColor(GxEPD_BLACK);
     lineY = 0;
+    time = getNextLinePositionTime();
+    other = getNextLinePositionOther();
 }
