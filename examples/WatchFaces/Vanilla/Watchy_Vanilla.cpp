@@ -13,15 +13,15 @@ void WatchyVanilla::drawWatchFace() {
 void WatchyVanilla::drawTime() {
     uint16_t i;
 
-    int relTzHour[] = {0, 3, 12};
-    int relTzMin[] = {0, 0, 30};
+    int16_t relTzHour[] = {0, 3, 12};
+    int16_t relTzMin[] = {0, 0, 30};
     String tzName[] = {"PST", "EST", "IST"};
 
     String adjustedTime;
 
     lineY += DEFAULT_LINE_SPACING;
 
-    for(i = 0; i < 3; i++) {
+    for(i = 0; i < NUM_TZ; i++) {
         adjustedTime = getAdjustedTime(relTzHour[i], relTzMin[i]);
         display.setFont(&DSEG7Classic_Regular12pt7b);
         lineY += time.h;
@@ -34,9 +34,9 @@ void WatchyVanilla::drawTime() {
     }
 }
 
-String WatchyVanilla::getAdjustedTime(int hourOffset, int minuteOffset) {
-    int displayMinute = (currentTime.Minute + minuteOffset) % 60;
-    int displayHour = (currentTime.Hour + hourOffset) % 24 + (currentTime.Minute + minuteOffset >= 60 ? 1 : 0);
+String WatchyVanilla::getAdjustedTime(int16_t hourOffset, int16_t minuteOffset) {
+    int16_t displayMinute = (currentTime.Minute + minuteOffset) % 60;
+    int16_t displayHour = (currentTime.Hour + hourOffset) % 24 + (currentTime.Minute + minuteOffset >= 60 ? 1 : 0);
     if (displayHour == 24) {
         displayHour = 0;
     }
@@ -98,7 +98,7 @@ void WatchyVanilla::drawBattery() {
     lineY += other.h;
 
     float V = getBatteryVoltage();
-    int batP = (int)((V - BATTERY_VOLTAGE_MIN) / (BATTERY_VOLTAGE_MAX - BATTERY_VOLTAGE_MIN) * 100);
+    uint16_t batP = (int)((V - BATTERY_VOLTAGE_MIN) / (BATTERY_VOLTAGE_MAX - BATTERY_VOLTAGE_MIN) * 100);
 
     display.setFont(&FreeMono12pt7b);
     display.setCursor(0, lineY);
