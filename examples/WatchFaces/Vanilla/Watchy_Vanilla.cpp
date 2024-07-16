@@ -2,6 +2,18 @@
 
 void WatchyVanilla::drawWatchFace() {
     initialize();
+    businessLogic();
+    displayLogic();
+}
+
+void WatchyVanilla::businessLogic() {
+    cacheBatteryPercentage();
+    cacheTimes();
+    cacheDate();
+    cacheSteps();
+}
+
+void WatchyVanilla::displayLogic() {
     drawBattery();
     drawConnectivity();
     drawTime();
@@ -10,23 +22,60 @@ void WatchyVanilla::drawWatchFace() {
     drawWeather();
 }
 
+void WatchyVanilla::cacheBatteryPercentage() {
+    float V = getBatteryVoltage();
+    batteryPercentage = (int)((V - BATTERY_VOLTAGE_MIN) / (BATTERY_VOLTAGE_MAX - BATTERY_VOLTAGE_MIN) * 100);
+}
+
+void WatchyVanilla::cacheTimes() {
+    uint16_t i;
+    uint16_t carry;
+    for (i = 0; i < NUM_TZ; i++) {
+        times[i].hour = currentTime.Hour;
+        times[i].minute = currentTime.Minute;
+
+        carry = (times[i].minute + relTzMin[i]) / 60;
+        times[i].minute = (times[i].minute + relTzMin[i]) % 60;
+        times[i].hour = (times[i].hour + carry + relTzHour[i]) % 24;
+    }
+}
+
+void WatchyVanilla::cacheDate() {
+    date.weekday = dayShortStr(currentTime.Wday);
+    date.year = currentTime.Year + 1970;
+    date.month = currentTime.Month;
+    date.day = currentTime.Day;
+}
+
+void WatchyVanilla::cacheSteps() {
+    // Reset at midnight of local time
+    if (currentTime.Hour == 0 && currentTime.Minute == 0) {
+        sensor.resetStepCounter();
+    }
+
+    stepCount = sensor.getCounter();
+}
+
 void WatchyVanilla::drawTime() {
     uint16_t i;
-
-    int16_t relTzHour[] = {0, 3, 12};
-    int16_t relTzMin[] = {0, 0, 30};
-    String tzName[] = {"PST", "EST", "IST"};
 
     String adjustedTime;
 
     lineY += DEFAULT_LINE_SPACING;
 
     for(i = 0; i < NUM_TZ; i++) {
-        adjustedTime = getAdjustedTime(relTzHour[i], relTzMin[i]);
         display.setFont(&DSEG7Classic_Regular12pt7b);
         lineY += time.h;
         display.setCursor(0, lineY);
-        display.print(adjustedTime);
+        if (times[i].hour < 10) {
+            display.print("0");
+        }
+        display.print(times[i].hour);
+        display.print(":");
+        if (times[i].minute < 10) {
+            display.print("0");
+        }
+        display.print(times[i].minute);
         display.setFont(&FreeMono12pt7b);
         display.setCursor(time.w + DEFAULT_TIMEZONE_SPACING, lineY);
         display.print(tzName[i]);
@@ -34,58 +83,30 @@ void WatchyVanilla::drawTime() {
     }
 }
 
-String WatchyVanilla::getAdjustedTime(int16_t hourOffset, int16_t minuteOffset) {
-    int16_t displayMinute = (currentTime.Minute + minuteOffset) % 60;
-    int16_t displayHour = (currentTime.Hour + hourOffset) % 24 + (currentTime.Minute + minuteOffset >= 60 ? 1 : 0);
-    if (displayHour == 24) {
-        displayHour = 0;
-    }
-
-    String timeStr("");
-    if (displayHour < 10) {
-        timeStr.concat("0");
-    }
-    timeStr.concat(displayHour);
-
-    timeStr.concat(":");
-
-    if (displayMinute < 10) {
-        timeStr.concat("0");
-    }
-    timeStr.concat(displayMinute);
-
-    return timeStr;
-}
-
 void WatchyVanilla::drawDate() {
     display.setFont(&FreeMono12pt7b);
     lineY += other.h;
     display.setCursor(0, lineY);
-    display.print(dayShortStr(currentTime.Wday));
+    display.print(date.weekday);
     display.print(" ");
-    display.print(currentTime.Year + 1970);
+    display.print(date.year);
     display.print("-");
-    if (currentTime.Month < 10) {
+    if (date.month < 10) {
         display.print("0");
     }
-    display.print(currentTime.Month);
+    display.print(date.month);
     display.print("-");
-    if (currentTime.Day < 10) {
+    if (date.day < 10) {
         display.print("0");
     }
-    display.println(currentTime.Day);
+    display.println(date.day);
     lineY += DEFAULT_LINE_SPACING;
 }
 
 void WatchyVanilla::drawSteps() {
-    if (currentTime.Hour == 0 && currentTime.Minute == 0) {
-        sensor.resetStepCounter();
-    }
-
     display.setFont(&FreeMono12pt7b);
     lineY += other.h;
 
-    uint32_t stepCount = sensor.getCounter();
     display.setCursor(0, lineY);
     display.print("Steps: ");
     display.println(stepCount);
@@ -97,16 +118,13 @@ void WatchyVanilla::drawBattery() {
     display.setFont(&FreeMono12pt7b);
     lineY += other.h;
 
-    float V = getBatteryVoltage();
-    uint16_t batP = (int)((V - BATTERY_VOLTAGE_MIN) / (BATTERY_VOLTAGE_MAX - BATTERY_VOLTAGE_MIN) * 100);
-
     display.setFont(&FreeMono12pt7b);
     display.setCursor(0, lineY);
     display.print("Battery:  ");
-    if (batP < 100) {
+    if (batteryPercentage < 100) {
         display.print(" ");
     }
-    display.print(batP);
+    display.print(batteryPercentage);
     display.println("%");
 
     lineY += DEFAULT_LINE_SPACING;

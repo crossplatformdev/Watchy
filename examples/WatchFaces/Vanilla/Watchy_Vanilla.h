@@ -16,9 +16,22 @@ const String OTHER_CALLIBRATION_STRING = "X1Il^qpyi";
 const uint16_t NUM_TZ = 3;
 const uint16_t NUM_CHARS = 14;
 
+const int16_t relTzHour[] = {0, 3, 12};
+const int16_t relTzMin[] = {0, 0, 30};
+const String tzName[] = {"PST", "EST", "IST"};
+
 struct Position {
     int16_t x1, y1;
     uint16_t w, h;
+};
+
+struct Date {
+    String weekday;
+    uint16_t month, day, year;
+};
+
+struct Time {
+    uint16_t hour, minute;
 };
 
 class WatchyVanilla : public Watchy {
@@ -28,7 +41,13 @@ class WatchyVanilla : public Watchy {
         void drawWatchFace();
 
     private:
+        void businessLogic();
+        void displayLogic();
         void initialize();
+        void cacheBatteryPercentage();
+        void cacheTimes();
+        void cacheDate();
+        void cacheSteps();
         void drawTime();
         void drawDate();
         void drawConnectivity();
@@ -37,8 +56,11 @@ class WatchyVanilla : public Watchy {
         void drawBattery();
         Position getNextLinePositionTime();
         Position getNextLinePositionOther();
-        String getAdjustedTime(int16_t, int16_t);
         Position getNextLinePositionHelper(const GFXfont *, String);
+        uint16_t batteryPercentage;
+        Date date;
+        Time times[NUM_TZ];
+        uint32_t stepCount;
         uint16_t lineY;
         Position time;
         Position other;
