@@ -19,7 +19,7 @@ void WatchyVanilla::drawTime() {
 
     String adjustedTime;
 
-    lineY += 2;
+    lineY += DEFAULT_LINE_SPACING;
 
     for(i = 0; i < 3; i++) {
         adjustedTime = getAdjustedTime(relTzHour[i], relTzMin[i]);
@@ -28,9 +28,9 @@ void WatchyVanilla::drawTime() {
         display.setCursor(0, lineY);
         display.print(adjustedTime);
         display.setFont(&FreeMono12pt7b);
-        display.setCursor(time.w + 5, lineY);
+        display.setCursor(time.w + DEFAULT_TIMEZONE_SPACING, lineY);
         display.print(tzName[i]);
-        lineY += 2;
+        lineY += DEFAULT_LINE_SPACING;
     }
 }
 
@@ -74,7 +74,7 @@ void WatchyVanilla::drawDate() {
         display.print("0");
     }
     display.println(currentTime.Day);
-    lineY += 2;
+    lineY += DEFAULT_LINE_SPACING;
 }
 
 void WatchyVanilla::drawSteps() {
@@ -90,7 +90,7 @@ void WatchyVanilla::drawSteps() {
     display.print("Steps: ");
     display.println(stepCount);
 
-    lineY += 2;
+    lineY += DEFAULT_LINE_SPACING;
 }
 
 void WatchyVanilla::drawBattery() {
@@ -98,7 +98,7 @@ void WatchyVanilla::drawBattery() {
     lineY += other.h;
 
     float V = getBatteryVoltage();
-    int batP = (int)((V - 3.48) / (3.91 - 3.48) * 100);
+    int batP = (int)((V - BATTERY_VOLTAGE_MIN) / (BATTERY_VOLTAGE_MAX - BATTERY_VOLTAGE_MIN) * 100);
 
     display.setFont(&FreeMono12pt7b);
     display.setCursor(0, lineY);
@@ -109,7 +109,7 @@ void WatchyVanilla::drawBattery() {
     display.print(batP);
     display.println("%");
 
-    lineY += 2;
+    lineY += DEFAULT_LINE_SPACING;
 }
 
 void WatchyVanilla::drawConnectivity() {
@@ -124,7 +124,7 @@ void WatchyVanilla::drawConnectivity() {
     display.print(" BLE: ");
     display.println(BLE_CONFIGURED ? "Y" : "N");
 
-    lineY += 2;
+    lineY += DEFAULT_LINE_SPACING;
 }
 
 void WatchyVanilla::drawWeather() {
@@ -180,16 +180,16 @@ void WatchyVanilla::drawWeather() {
     }
     display.println(weatherIcon);
 
-    display.setCursor(w + 4, lineY - h / 2);
+    display.setCursor(w + DEFAULT_DEGREE_SYMBOL_SPACING, lineY - h / 2);
     display.print("o");
 }
 
 Position WatchyVanilla::getNextLinePositionTime() {
-    return getNextLinePositionHelper(&DSEG7Classic_Regular12pt7b, "88:888");
+    return getNextLinePositionHelper(&DSEG7Classic_Regular12pt7b, TIME_CALLIBRATION_STRING);
 }
 
 Position WatchyVanilla::getNextLinePositionOther() {
-    return getNextLinePositionHelper(&FreeMono12pt7b, "X1Il^qpyi");
+    return getNextLinePositionHelper(&FreeMono12pt7b, OTHER_CALLIBRATION_STRING);
 }
 
 Position WatchyVanilla::getNextLinePositionHelper(const GFXfont *font, String callibration) {
