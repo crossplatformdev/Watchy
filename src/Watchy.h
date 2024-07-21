@@ -16,7 +16,8 @@
 #include "bma.h"
 #include "config.h"
 #include "esp_chip_info.h"
-#include "TimezonesGMT.h"
+//#include "WatchySDK.h"
+//#include "WatchySDK_Apps.h"
 #ifdef ARDUINO_ESP32S3_DEV
   #include "Watchy32KRTC.h"
   #include "soc/rtc.h"
@@ -73,7 +74,7 @@ public:
   static GxEPD2_BW<WatchyDisplay, WatchyDisplay::HEIGHT> display;
   tmElements_t currentTime;
   watchySettings settings;
-
+  
 public:
   explicit Watchy(const watchySettings &s) : settings(s) {} // constructor
   void init(String datetime = "");
@@ -85,6 +86,7 @@ public:
   virtual void handleButtonPress();
   void showMenu(byte menuIndex, bool partialRefresh);
   void showFastMenu(byte menuIndex);
+  void showMenuDefault();
   void showAbout();
   void showBuzz();
   void showAccelerometer();
@@ -100,6 +102,8 @@ public:
   void updateFWBegin();
 
   void showWatchFace(bool partialRefresh);
+  void showWatchFaceDefault();
+
   virtual void drawWatchFace(); // override this method for different watch
                                 // faces
 

@@ -38,9 +38,7 @@ class WatchyDisplay : public GxEPD2_EPD
     // constructor
     WatchyDisplay();
     void initWatchy();
-    void drawDarkBorder(bool darkBorder);
     void setDarkBorder(bool darkBorder);
-    bool isDarkBorder();
     void asyncPowerOn();
     void _PowerOnAsync();
     bool waitingPowerOn = false;
@@ -78,7 +76,7 @@ class WatchyDisplay : public GxEPD2_EPD
     void powerOff(); // turns off generation of panel driving voltages, avoids screen fading over time
     void hibernate(); // turns powerOff() and sets controller to deep sleep for minimum power use, ONLY if wakeable by RST (rst >= 0)
 
-    bool darkBorder = true; // adds a dark border outside the normal screen area
+    bool darkBorder = false; // adds a dark border outside the normal screen area
 
     static constexpr bool reduceBoosterTime = true; // Saves ~200ms
   private:
