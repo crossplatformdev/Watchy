@@ -16,8 +16,6 @@
 #include "bma.h"
 #include "config.h"
 #include "esp_chip_info.h"
-//#include "WatchySDK.h"
-//#include "WatchySDK_Apps.h"
 #ifdef ARDUINO_ESP32S3_DEV
   #include "Watchy32KRTC.h"
   #include "soc/rtc.h"
@@ -64,6 +62,8 @@ typedef struct watchySettings {
   bool vibrateOClock;
 } watchySettings;
 
+
+
 class Watchy {
 public:
   #ifdef ARDUINO_ESP32S3_DEV
@@ -73,10 +73,9 @@ public:
   #endif
   static GxEPD2_BW<WatchyDisplay, WatchyDisplay::HEIGHT> display;
   tmElements_t currentTime;
-  watchySettings settings;
-  
+  watchySettings settings; 
 public:
-  explicit Watchy(const watchySettings &s) : settings(s) {} // constructor
+  Watchy(const watchySettings &s) : settings(s) {}; // constructor
   void init(String datetime = "");
   void deepSleep();
   float getBatteryVoltage();
@@ -106,6 +105,9 @@ public:
 
   virtual void drawWatchFace(); // override this method for different watch
                                 // faces
+  static GxEPD2_BW<WatchyDisplay, WatchyDisplay::HEIGHT> getDisplay();
+
+
 
 private:
   void _bmaConfig();
@@ -124,5 +126,4 @@ extern RTC_DATA_ATTR BMA423 sensor;
 extern RTC_DATA_ATTR bool WIFI_CONFIGURED;
 extern RTC_DATA_ATTR bool BLE_CONFIGURED;
 extern RTC_DATA_ATTR bool USB_PLUGGED_IN;
-
 #endif

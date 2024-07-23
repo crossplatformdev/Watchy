@@ -3,11 +3,11 @@
 
 #include "WatchySDK.h"
 
-class HelloWorld : WatchySDK::Text{
+class HelloWorld : public WatchySDK::Text{
     public:
         HelloWorld(){
             text = (char*) "Hello World!";
-        }
+        };
 };
 
 

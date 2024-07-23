@@ -1,12 +1,10 @@
 #ifndef WATCHYSDK_H
 #define WATCHYSDK_H
 
-#ifndef WATCHY_H
 #include "Watchy.h"
-#endif
 
-class WatchySDK {
-    public:
+class WatchySDK : public Watchy {
+    public:       
         class App {
             public:
                 void (*onStart)(void);
@@ -15,27 +13,39 @@ class WatchySDK {
                 void (*onButtonDown)(void);
                 void (*onButtonMenu)(void);
                 void (*onButtonBack)(void);
+                void render() { return; };
         };
 
-        class Text : App {
+        class Text : public App {
             public:
                 int pos_x = 0;
                 int pos_y = 0;
                 char* text;
                 const GFXfont* font = &FreeMonoBold9pt7b;
+                void render(){                
+                    getDisplay().setFont(font);
+                    getDisplay().setCursor(pos_x, pos_y);
+                    getDisplay().print(text); 
+                }
         };
 
-        class InputText : Text{
+        class InputText : public Text{
             public:
                 Text app;    
                 char* input;
                 int inputLength = 0;
                 bool isPassword = false;
                 void (*onValueChange)(void) = NULL;
+                void render(){
+                    getDisplay().setFont(font);
+                    getDisplay().setCursor(pos_x, pos_y);
+                    getDisplay().print(text);
+                    getDisplay().print(input);             
+                }
         };
 
         //InputInt
-        class InputInt : Text{
+        class InputInt : public Text{
             public:
                 Text app;
                 int value = 0;
@@ -45,9 +55,15 @@ class WatchySDK {
                 int color = GxEPD_WHITE;
                 int colorText = GxEPD_BLACK;
                 void (*onValueChange)(void) = NULL;
+                void render(){
+                    getDisplay().setFont(font);
+                    getDisplay().setCursor(pos_x, pos_y);
+                    getDisplay().print(text);
+                    getDisplay().print(value);             
+                }
         };
 
-        class InputFloat : Text{ 
+        class InputFloat : public Text{ 
             public:
                 Text app;
                 float value = 0;
@@ -57,9 +73,16 @@ class WatchySDK {
                 int color = GxEPD_WHITE;
                 int colorText = GxEPD_BLACK;
                 void (*onValueChange)(void) = NULL;
+        
+                void render(){
+                    getDisplay().setFont(font);
+                    getDisplay().setCursor(pos_x, pos_y);
+                    getDisplay().print(text);
+                    getDisplay().print(value);             
+                }
         };
 
-        class Button : Text {
+        class Button : public Text {
             public:
                 Text app;
             
@@ -72,49 +95,17 @@ class WatchySDK {
                 int colorTextPressed = GxEPD_WHITE;
             
                 void (*onPressed)(void) = NULL;
-        };
 
-        class Item : App {
-            public:
-                App app;
-                void (*onSelect)(void) = NULL;
+                void render(){
+                    getDisplay().setFont(font);
+                    getDisplay().fillRect(pos_x, pos_y, width, height, color);
+                    getDisplay().setCursor(pos_x + (width / 2), pos_y + (height / 2));
+                    getDisplay().print(text); 
+                }
         };
-
-        class Collection {
-            public:
-                int itemCount = 0;
-                class Item *items;    
-        };
-
-        class ButtonMenu : Collection {
-            public:
-                Collection collection;
-                int selected = 0;
-        };
-
-        class TextMenu : Collection {
-            public:                
-                Collection collection;
-                int selected = 0;
-        };
-
-        class Image : App {
-            public:
-                App app;
-                const unsigned char* image;
-                int width = 0;
-                int height = 0;
-        };
-
-    public:
-    //Render Method (Headers):
-        int handleInput(WatchySDK::App app);
-        void render(WatchySDK::App app);
-        /*
-        void persistSetting(char* key, char* value);
-        char* getSetting(char* key);
-        */
-        void _do();
+        WatchySDK(const watchySettings &settings) : Watchy(settings) {};
+        static int handleInput(WatchySDK::App *app);
+        static void render(WatchySDK::App *app);
+        static void launchApp(WatchySDK::App *app);
 };
-
 #endif

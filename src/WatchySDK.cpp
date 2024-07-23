@@ -1,103 +1,71 @@
 #include "WatchySDK.h"
-#include "Watchy.h"
+#include "WatchySDK_Apps.h"
 
-int WatchySDK::handleInput(App app){
+#ifdef ARDUINO_ESP32S3_DEV
+  #define ACTIVE_LOW 0
+#else
+  #define ACTIVE_LOW 1
+#endif
+
+int WatchySDK::handleInput(WatchySDK::App *app){
     //Handle the input
 
 
     //If UP or DOWN is pressed
     if (digitalRead(UP_BTN_PIN) == ACTIVE_LOW){
-        app.onButtonUp();
+        app->onButtonUp();
         return UP_BTN_PIN;
     }
 
     if (digitalRead(DOWN_BTN_PIN) == ACTIVE_LOW){
-        app.onButtonDown();
+        app->onButtonDown();
         return DOWN_BTN_PIN;
     }
 
     if (digitalRead(MENU_BTN_PIN) == ACTIVE_LOW){
-        app.onButtonMenu();
+        app->onButtonMenu();
         return MENU_BTN_PIN;
     }
 
     if (digitalRead(BACK_BTN_PIN) == ACTIVE_LOW){
-        app.onButtonBack();
+        app->onButtonBack();
         return BACK_BTN_PIN;
     }
-
+    return -1;
 }
+
 
 
 //Implement the method render(App app) that may be able to render All App.
-void WatchySDK::render(App app){
-        //All the logic
-    //Handle button press
-    
-    //Render
-    Serial.println("onStart");
-    app.onStart();
-    //Handle button press
+void WatchySDK::render(WatchySDK::App *app){    
+    app->onStart();
+
     while(1){
-
-        handleInput(app);
-
-        //Render
-        Serial.println("render app");
-        //for all elements in a collection, render it
-        if(app.app != NULL){
-            if (typeof app.app == typeof Collection){
-                for (int i = 0; i < app.itemCount; i++){
-                    render(app.items[i].app);
-                }
-            }
-
-            //if App.app exist, render it
-            if (app.app != NULL){
-                render(app.app);
-            }
-
-            //if App.app == Text, render it
-            if (typeof app.app == typeof Text){
-                display.setFont(app.font);
-                display.setCursor(app.pos_x, app.pos_y);
-                display.print(app.text);        
-            } 
-        } else {
-            //if App.app == Text, render it
-            if (typeof app == typeof Text){
-                display.setFont(app.font);
-                display.setCursor(app.pos_x, app.pos_y);
-                display.print(app.text);        
-            } 
-        }
-
-
-        //ALL the logic
-        switch (input){
-            case UP:
-                app.onButtonUp();
-                break;
-            case DOWN:
-                app.onButtonDown();
-                break;
-            case MENU:
-                app.onButtonMenu();
-                break;
-            case BACK:
-                app.onButtonBack();
-                break;
-        }
-
-        //if back is pressed, onStop()
-        if (app.onBack()){
-            Serial.println("onStop");
-            app.onStop();
-        }
-    }
+            
+            int input = handleInput(app);
     
+            //Render
+            Serial.println("render app");
+            
+            //If type is text
+            app->render();
+
+            //If back button is pressed
+            if (input == BACK_BTN_PIN){
+                app->onButtonBack();
+                break;
+            }
+
+            sleep(100);
+    }
+
+    app->onStop();
 }
 
-void WatchySDK::_do(){
 
+void WatchySDK::launchApp(WatchySDK::App *app){
+  Serial.println("Launching SDK App");
+  WatchySDK::App *activeApp = (WatchySDK::App *) app;
+  render(activeApp);
+  Serial.println("SDK App Finished");
 }

@@ -1,7 +1,6 @@
 #include "Watchy.h"
 #include "WatchySDK.h"
 #include "WatchySDK_Apps.h"
-
 #ifdef ARDUINO_ESP32S3_DEV
   Watchy32KRTC Watchy::RTC;
   #define ACTIVE_LOW 0
@@ -25,7 +24,7 @@ RTC_DATA_ATTR bool USB_PLUGGED_IN = false;
 RTC_DATA_ATTR tmElements_t bootTime;
 RTC_DATA_ATTR uint32_t lastIPAddress;
 RTC_DATA_ATTR char lastSSID[30];
-
+/*
 RTC_DATA_ATTR class WatchyMenuApp : WatchySDK::App{
   public:
       WatchyMenuApp(){
@@ -38,7 +37,8 @@ RTC_DATA_ATTR class WatchyMenuApp : WatchySDK::App{
     }
 };
 
-
+*/
+RTC_DATA_ATTR WatchySDK *sdk;  // global pointer to WatchySDK object
 
 void Watchy::init(String datetime) {
   esp_sleep_wakeup_cause_t wakeup_reason;
@@ -111,6 +111,7 @@ void Watchy::init(String datetime) {
   }
   deepSleep();
 }
+
 void Watchy::deepSleep() {
   display.hibernate();
   RTC.clearAlarm();        // resets the alarm flag in the RTC
@@ -180,10 +181,7 @@ void Watchy::handleButtonPress() {
         showSyncNTP();
         break;
       case 7:
-        Serial.println("Launching SDK App");
-        App activeApp = new HelloWorld();
-        render(activeApp);
-        Serial.println("SDK App Finished");
+        sdk->launchApp(new HelloWorld());
         break;
       default:
         break;
@@ -268,10 +266,7 @@ void Watchy::handleButtonPress() {
             showSyncNTP();
             break;
           case 7:
-            Serial.println("Launching SDK App");
-            App activeApp = new HelloWorld();
-            render(activeApp);
-            Serial.println("SDK App Finished");
+            sdk->launchApp(new HelloWorld());
             break;
           default:
             break;
@@ -326,7 +321,7 @@ void Watchy::showMenu(byte menuIndex, bool partialRefresh) {
   const char *menuItems[] = {
       "About Watchy", "Vibrate Motor", "Show Accelerometer",
       "Set Time",     "Setup WiFi",    "Update Firmware",
-      "Sync NTP"};
+      "Sync NTP",     "Launch App"};
   for (int i = 0; i < MENU_LENGTH; i++) {
     yPos = MENU_HEIGHT + (MENU_HEIGHT * i);
     display.setCursor(0, yPos);
@@ -359,7 +354,7 @@ void Watchy::showFastMenu(byte menuIndex) {
   const char *menuItems[] = {
       "About Watchy", "Vibrate Motor", "Show Accelerometer",
       "Set Time",     "Setup WiFi",    "Update Firmware",
-      "Sync NTP"};
+      "Sync NTP",     "Launch App"};
   for (int i = 0; i < MENU_LENGTH; i++) {
     yPos = MENU_HEIGHT + (MENU_HEIGHT * i);
     display.setCursor(0, yPos);
@@ -1186,4 +1181,8 @@ bool Watchy::syncNTP(long gmt, String ntpServer) {
   breakTime((time_t)timeClient.getEpochTime(), tm);
   RTC.set(tm);
   return true;
+}
+
+GxEPD2_BW<WatchyDisplay, WatchyDisplay::HEIGHT> Watchy::getDisplay() {
+  return display;
 }
