@@ -1,5 +1,6 @@
 #include "Watchy.h"
-
+#include "WatchySDK.h"
+#include "WatchySDK_Apps.h"
 #ifdef ARDUINO_ESP32S3_DEV
   Watchy32KRTC Watchy::RTC;
   #define ACTIVE_LOW 0
@@ -17,19 +18,31 @@ RTC_DATA_ATTR bool WIFI_CONFIGURED;
 RTC_DATA_ATTR bool BLE_CONFIGURED;
 RTC_DATA_ATTR weatherData currentWeather;
 RTC_DATA_ATTR int weatherIntervalCounter = -1;
-#ifdef GMT_OFFSET_SEC 
-RTC_DATA_ATTR long gmtOffset = GMT_OFFSET_SEC;
-#else
 RTC_DATA_ATTR long gmtOffset = 0;
-#endif
 RTC_DATA_ATTR bool alreadyInMenu         = true;
 RTC_DATA_ATTR bool USB_PLUGGED_IN = false;
 RTC_DATA_ATTR tmElements_t bootTime;
 RTC_DATA_ATTR uint32_t lastIPAddress;
 RTC_DATA_ATTR char lastSSID[30];
 RTC_DATA_ATTR MoonPhase mp;
+/*
+RTC_DATA_ATTR class WatchyMenuApp : WatchySDK::App{
+  public:
+      WatchyMenuApp(){
+        onStart      = (void (*)()) &Watchy::showMenuDefault;
+        onStop       = (void (*)()) &Watchy::showWatchFaceDefault;
+        onButtonUp   = (void (*)()) &Watchy::handleButtonPress;
+        onButtonDown = (void (*)()) &Watchy::handleButtonPress;
+        onButtonBack = (void (*)()) &Watchy::handleButtonPress;
+        onButtonMenu = (void (*)()) &Watchy::handleButtonPress;
+    }
+};
+
+*/
+RTC_DATA_ATTR WatchySDK *sdk;
 
 void Watchy::init(String datetime) {
+  sdk = new WatchySDK();
   esp_sleep_wakeup_cause_t wakeup_reason;
   wakeup_reason = esp_sleep_get_wakeup_cause(); // get wake up reason
   #ifdef ARDUINO_ESP32S3_DEV
@@ -104,6 +117,7 @@ void Watchy::init(String datetime) {
   mp.calculate(epoch);
   deepSleep();
 }
+
 void Watchy::deepSleep() {
   display.hibernate();
   RTC.clearAlarm();        // resets the alarm flag in the RTC
@@ -122,7 +136,7 @@ void Watchy::deepSleep() {
   //rtc_clk_slow_freq_set(RTC_SLOW_FREQ_32K_XTAL);
   struct tm timeinfo;
   getLocalTime(&timeinfo);
-  int secToNextMin = 60 - timeinfo.tm_sec;
+  int secToNextMin = 600 - timeinfo.tm_sec;
   esp_sleep_enable_timer_wakeup(secToNextMin * uS_TO_S_FACTOR);
   #else
   // Set GPIOs 0-39 to input to avoid power leaking out
@@ -173,7 +187,10 @@ void Watchy::handleButtonPress() {
         showSyncNTP();
         break;
       case 7:
-        showMoonPhase();
+        Serial.println("Launching App");
+        sdk->launchApp(new HelloWorld(), 1, NULL);
+        Serial.println("App Launched");
+        break;
       default:
         break;
       }
@@ -257,7 +274,10 @@ void Watchy::handleButtonPress() {
             showSyncNTP();
             break;
           case 7:
-            showMoonPhase();
+            Serial.println("Launching App");
+            sdk->launchApp(new HelloWorld(), 1, NULL);
+            Serial.println("App Launched");
+            break;
           default:
             break;
           }
@@ -311,7 +331,7 @@ void Watchy::showMenu(byte menuIndex, bool partialRefresh) {
   const char *menuItems[] = {
       "About Watchy", "Vibrate Motor", "Show Accelerometer",
       "Set Time",     "Setup WiFi",    "Update Firmware",
-      "Sync NTP",     "Moon Phase"};
+      "Sync NTP",     "Launch App"};
   for (int i = 0; i < MENU_LENGTH; i++) {
     yPos = MENU_HEIGHT/2 + (MENU_HEIGHT * i);
     display.setCursor(0, yPos);
@@ -344,7 +364,7 @@ void Watchy::showFastMenu(byte menuIndex) {
   const char *menuItems[] = {
       "About Watchy", "Vibrate Motor", "Show Accelerometer",
       "Set Time",     "Setup WiFi",    "Update Firmware",
-      "Sync NTP",     "Moon Phase"};
+      "Sync NTP",     "Launch App"};
   for (int i = 0; i < MENU_LENGTH; i++) {
     yPos = MENU_HEIGHT/2 + (MENU_HEIGHT * i);
     display.setCursor(0, yPos);
@@ -411,57 +431,6 @@ void Watchy::showAbout() {
   display.display(true); // full refresh
 
   guiState = APP_STATE;
-}
-
-void Watchy::showMoonPhase() {
-    
-    RTC.read(currentTime);
-    time_t epoch = makeTime(currentTime);
-    mp.calculate(epoch);
-
-    display.setFullWindow();
-    display.fillScreen(GxEPD_BLACK);
-    display.setFont(&FreeMonoBold9pt7b);
-    display.setTextColor(GxEPD_WHITE);
-    display.setCursor(0, 10);
-   
-    display.setCursor(0, MENU_HEIGHT);
-
-    display.print("Date: ");
-    display.println(mp.jDate);
-    
-    display.print("Phase: ");
-    display.println(mp.phase);
-
-    display.print("Age: ");
-    display.print(mp.age);
-    display.println(" days");
-
-    display.print("Visibility: ");
-    display.print(mp.fraction);
-    display.println("%");
-
-    display.print("Distance: ");
-    display.print(mp.distance);
-    display.println(" er");
-
-    display.print("Latitude: ");
-    display.print(mp.latitude);
-    display.println("°");
-
-    display.print("Longitude: ");
-    display.print(mp.longitude);
-    display.println("°");
-
-    display.print("Ph.: ");
-    display.println(mp.phaseName);
-
-    display.print("Zodiac: ");
-    display.println(mp.zodiacName);
-    
-    display.display(true); // full refresh
-
-    guiState = APP_STATE;
 }
 
 void Watchy::showBuzz() {
@@ -1261,4 +1230,8 @@ bool Watchy::syncNTP(long gmt, String ntpServer) {
   time_t epoch = makeTime(currentTime);
   mp.calculate(epoch);
   return true;
+}
+
+GxEPD2_BW<WatchyDisplay, WatchyDisplay::HEIGHT> Watchy::getDisplay() {
+  return display;
 }

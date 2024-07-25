@@ -104,6 +104,9 @@ public:
   void showWatchFace(bool partialRefresh);
   virtual void drawWatchFace(); // override this method for different watch
                                 // faces
+  static GxEPD2_BW<WatchyDisplay, WatchyDisplay::HEIGHT> getDisplay();
+
+
 
 private:
   void _bmaConfig();
