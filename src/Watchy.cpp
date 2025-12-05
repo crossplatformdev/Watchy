@@ -162,18 +162,18 @@ void Watchy::handleButtonPress() {
       case 4:
         setupWifi();
         break;
-      case 5:
+      /*case 5:
         showUpdateFW();
-        break;
-      case 6:
+        break;*/
+      case 5:
         showSyncNTP();
         break;
       default:
         break;
       }
-    } else if (guiState == FW_UPDATE_STATE) {
+    } /*else if (guiState == FW_UPDATE_STATE) {
       updateFWBegin();
-    }
+    }*/
   }
   // Back Button
   else if (wakeupBit & BACK_BTN_MASK) {
@@ -244,18 +244,18 @@ void Watchy::handleButtonPress() {
           case 4:
             setupWifi();
             break;
-          case 5:
+          /*case 5:
             showUpdateFW();
-            break;
-          case 6:
+            break;*/
+          case 5:
             showSyncNTP();
             break;
           default:
             break;
           }
-        } else if (guiState == FW_UPDATE_STATE) {
+        }/* else if (guiState == FW_UPDATE_STATE) {
           updateFWBegin();
-        }
+        }*/
       } else if (digitalRead(BACK_BTN_PIN) == ACTIVE_LOW) {
         lastTimeout = millis();
         if (guiState ==
@@ -302,7 +302,7 @@ void Watchy::showMenu(byte menuIndex, bool partialRefresh) {
 
   const char *menuItems[] = {
       "About Watchy", "Vibrate Motor", "Show Accelerometer",
-      "Set Time",     "Setup WiFi",    "Update Firmware",
+      "Set Time",     "Setup WiFi",    /*"Update Firmware",*/
       "Sync NTP"};
   for (int i = 0; i < MENU_LENGTH; i++) {
     yPos = MENU_HEIGHT + (MENU_HEIGHT * i);
@@ -335,7 +335,7 @@ void Watchy::showFastMenu(byte menuIndex) {
 
   const char *menuItems[] = {
       "About Watchy", "Vibrate Motor", "Show Accelerometer",
-      "Set Time",     "Setup WiFi",    "Update Firmware",
+      "Set Time",     "Setup WiFi",    /*"Update Firmware",*/
       "Sync NTP"};
   for (int i = 0; i < MENU_LENGTH; i++) {
     yPos = MENU_HEIGHT + (MENU_HEIGHT * i);
@@ -1019,7 +1019,7 @@ bool Watchy::connectWiFi() {
   }
   return WIFI_CONFIGURED;
 }
-
+/*
 void Watchy::showUpdateFW() {
   display.setFullWindow();
   display.fillScreen(GxEPD_BLACK);
@@ -1129,7 +1129,7 @@ void Watchy::updateFWBegin() {
   btStop();
   showMenu(menuIndex, true);
 }
-
+*/
 void Watchy::showSyncNTP() {
   display.setFullWindow();
   display.fillScreen(GxEPD_BLACK);
@@ -1166,6 +1166,8 @@ void Watchy::showSyncNTP() {
     } else {
       display.println("NTP Sync Failed");
     }
+    WiFi.mode(WIFI_OFF);
+    btStop();
   } else {
     display.println("WiFi Not Configured");
   }
